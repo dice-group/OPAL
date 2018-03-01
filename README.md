@@ -1,4 +1,4 @@
-# OPAL
+# Open Data Portal Germany (OPAL)
 
 * [projekt-opal.de](http://projekt-opal.de/)
 
