@@ -48,8 +48,8 @@ public abstract class CodeGenerator {
 					key = key.split(" ")[0];
 					sb.append("public String get" + key.substring(0, 1).toUpperCase() + key.substring(1).toLowerCase()
 							+ secondKey.substring(0, 1).toUpperCase() + secondKey.substring(1).toLowerCase() + "() {");
-					sb.append(
-							"return getJsonObject().getJSONObject(\"" + key + "\").getString(\"" + secondKey + "\");");
+					sb.append("return getJsonObject().getJSONObject(\"" + key + "\").get(\"" + secondKey
+							+ "\").toString();");
 					sb.append("}");
 					sb.append(System.lineSeparator());
 				}

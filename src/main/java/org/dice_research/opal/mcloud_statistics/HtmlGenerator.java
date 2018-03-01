@@ -14,12 +14,23 @@ import java.util.List;
  */
 public class HtmlGenerator {
 
+	final public static String AUTHOR = "Adrian Wilke";
 	final public static String TITLE = "mCloud statistics";
 	final public static String DATE = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+	final public static String GENERATOR_WEBSITE = "https://github.com/dice-group/OPAL/tree/mcloud-statistics";
+
 	protected StringBuilder stringBuilder;
 
 	public HtmlGenerator() {
 		stringBuilder = new StringBuilder();
+	}
+
+	public static String getHtmlLink(String url, String title) {
+		return "<a href=\"" + url + "\">" + title + "</a>";
+	}
+
+	public static String getHtmlLink(String url) {
+		return getHtmlLink(url, url);
 	}
 
 	public HtmlGenerator generateFooter() {
@@ -42,7 +53,7 @@ public class HtmlGenerator {
 		stringBuilder.append(System.lineSeparator());
 		stringBuilder.append("<title>" + TITLE + "</title>");
 		stringBuilder.append(System.lineSeparator());
-		stringBuilder.append("<meta name=\"author\" content=\"Adrian Wilke\">");
+		stringBuilder.append("<meta name=\"author\" content=\"" + AUTHOR + "\">");
 		stringBuilder.append(System.lineSeparator());
 		stringBuilder
 				.append("<link href=\"https://fonts.googleapis.com/css?family=Roboto:400,700\" rel=\"stylesheet\">");

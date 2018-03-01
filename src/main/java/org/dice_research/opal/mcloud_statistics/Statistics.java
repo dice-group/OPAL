@@ -2,9 +2,14 @@ package org.dice_research.opal.mcloud_statistics;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TreeMap;
 
 /**
  * Basic statistics.
@@ -13,9 +18,11 @@ import java.util.SortedSet;
  */
 public class Statistics {
 
-	SortedSet<McloudDataset> datasets;
-	String directory;
-	HtmlGenerator generator = new HtmlGenerator();
+	public final static boolean WRITE_FILE = true;
+
+	protected SortedSet<McloudDataset> datasets;
+	protected String directory;
+	protected HtmlGenerator generator = new HtmlGenerator();
 
 	public Statistics(String directory) {
 		this.directory = directory;
@@ -26,29 +33,106 @@ public class Statistics {
 		generator.generateHeader();
 
 		List<String> list = new LinkedList<String>();
-		list.add("Date of generation: " + HtmlGenerator.DATE);
+		list.add("Date of dataset crawling: Around 2018-02-15");
+		list.add("Date of statistics generation: " + HtmlGenerator.DATE);
 		list.add("Number of datasets: " + datasets.size());
+		list.add("Author: " + HtmlGenerator.AUTHOR);
+		list.add("Code: " + HtmlGenerator.getHtmlLink(HtmlGenerator.GENERATOR_WEBSITE));
 		generator.addList(list);
 
-		doDescription();
+		doDescriptions();
+		doLicenses();
 
 		for (McloudDataset dataset : datasets) {
 			generator.addHeading(dataset.getTitle());
 			list = new LinkedList<String>();
 			list.add("File: " + dataset.getFile().getName() + " (" + dataset.getFile().length() + " bytes)");
 			list.add("Description: " + dataset.getDescription());
+			list.add("License: " + dataset.getLicenseLicensename());
 			generator.addList(list);
 		}
 		return this;
 	}
 
-	protected void doDescription() {
+	protected void doLicenses() {
+		SortedMap<String, Integer> names = new TreeMap<String, Integer>();
+		SortedMap<String, Integer> locations = new TreeMap<String, Integer>();
+		Map<String, String> namesToLocations = new HashMap<String, String>();
+
+		int licenseNameGiven = 0;
+		int licenseNameNotGiven = 0;
+		int licenseLocationGiven = 0;
+		int licenseLocationNotGiven = 0;
+
+		for (McloudDataset dataset : datasets) {
+			if (dataset.getLicenseLicensename() != null && !dataset.getLicenseLicensename().isEmpty()) {
+				if (names.containsKey(dataset.getLicenseLicensename())) {
+					names.put(dataset.getLicenseLicensename(), names.get(dataset.getLicenseLicensename()) + 1);
+				} else {
+					names.put(dataset.getLicenseLicensename(), 1);
+				}
+				licenseNameGiven++;
+			} else {
+				licenseNameNotGiven++;
+			}
+
+			if (dataset.getLicenseLicenselocation() != null && !dataset.getLicenseLicenselocation().isEmpty()) {
+				if (locations.containsKey(dataset.getLicenseLicenselocation())) {
+					locations.put(dataset.getLicenseLicenselocation(),
+							locations.get(dataset.getLicenseLicenselocation()) + 1);
+				} else {
+					locations.put(dataset.getLicenseLicenselocation(), 1);
+				}
+				licenseLocationGiven++;
+			} else {
+				licenseLocationNotGiven++;
+			}
+
+			if (dataset.getLicenseLicensename() != null && !dataset.getLicenseLicensename().isEmpty()
+					&& dataset.getLicenseLicenselocation() != null && !dataset.getLicenseLicenselocation().isEmpty()) {
+				if (namesToLocations.containsKey(dataset.getLicenseLicensename())) {
+					if (!dataset.getLicenseLicenselocation()
+							.equals(namesToLocations.get(dataset.getLicenseLicensename()))) {
+						System.err.println("Warning: Different locations for " + dataset.getLicenseLicensename());
+					}
+				} else {
+					namesToLocations.put(dataset.getLicenseLicensename(), dataset.getLicenseLicenselocation());
+				}
+			}
+		}
+
+		generator.addHeading("Licenses");
+		List<String> list = new LinkedList<String>();
+		list.add("License name given: " + licenseNameGiven);
+		list.add("License name not given: " + licenseNameNotGiven);
+		list.add("Number of license names: " + names.size());
+		list.add("License location given: " + licenseLocationGiven);
+		list.add("License location not given: " + licenseLocationNotGiven);
+
+		SortedMap<String, Integer> namesSortByUses = Utils.sortMapByValue(names);
+		for (Entry<String, Integer> entry : namesSortByUses.entrySet()) {
+			String name = entry.getKey();
+			if (namesToLocations.containsKey(name)) {
+				name = HtmlGenerator.getHtmlLink(namesToLocations.get(name), name);
+			}
+			int percent = (100 * entry.getValue() / datasets.size());
+			list.add(entry.getValue() + " uses (" + percent + "%) of " + name);
+		}
+
+		generator.addList(list);
+
+	}
+
+	protected void doDescriptions() {
 		int min = Integer.MAX_VALUE;
 		int max = 0;
 		List<Integer> wordsList = new LinkedList<Integer>();
 		Integer[] wordsArray = new Integer[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 		for (McloudDataset dataset : datasets) {
 			int words = dataset.getDescription().split(" ").length;
+			if (dataset.getDescription().trim().isEmpty()) {
+				min = 0;
+			}
 			if (words < min) {
 				min = words;
 			}
@@ -99,7 +183,9 @@ public class Statistics {
 	}
 
 	public void writeHtmlFile() throws FileNotFoundException {
-		File file = generator.generateFooter().writeToFile(new File(directory));
-		System.out.println("Generated file: " + file.getPath());
+		if (WRITE_FILE) {
+			File file = generator.generateFooter().writeToFile(new File(directory));
+			System.out.println("Generated file: " + file.getPath());
+		}
 	}
 }
