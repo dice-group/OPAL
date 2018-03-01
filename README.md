@@ -1,3 +1,4 @@
 # mCloud statistics
 
-This branch holds code to parse mCloud JSON files.
+* Code to parse mCloud JSON files.
+* https://github.com/dice-group/OPAL/tree/mcloud-statistics
