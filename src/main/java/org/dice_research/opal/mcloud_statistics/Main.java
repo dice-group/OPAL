@@ -33,7 +33,7 @@ public abstract class Main {
 				for (File file : files) {
 					JsonInfo.add(new JsonInfo(file));
 				}
-				JsonInfo.printClassesInfo();
+				JsonInfo.printInfo();
 
 			} else if (args[1].equals(CODE_GENERATION)) {
 

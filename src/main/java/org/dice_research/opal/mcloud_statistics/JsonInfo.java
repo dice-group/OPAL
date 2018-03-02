@@ -35,13 +35,20 @@ public class JsonInfo extends Json {
 		return classesToKeys;
 	}
 
-	public static void printClassesInfo() {
+	public static List<String> getInfoStrings() {
+		List<String> info = new LinkedList<String>();
 		for (Entry<String, List<String>> mcloudDataset : getClassesInfo().entrySet()) {
-			System.out.println("Key(s) with values of type " + mcloudDataset.getKey());
+			info.add("Key(s) with values of type " + mcloudDataset.getKey());
 			for (String key : mcloudDataset.getValue()) {
-				System.out.println(" " + key);
+				info.add("- " + key);
 			}
-			System.out.println();
+		}
+		return info;
+	}
+
+	public static void printInfo() {
+		for (String infoString : getInfoStrings()) {
+			System.out.println(infoString);
 		}
 	}
 
