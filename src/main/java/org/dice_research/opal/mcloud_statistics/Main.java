@@ -11,33 +11,47 @@ import java.util.List;
  */
 public abstract class Main {
 
-	final static public String CODE_GENERATION = "code";
-	final static public String JSON_INFO = "json";
-	final static public String MCLOUD = "mcloud";
+	final static public String TASK_CODE_GENERATION = "code";
+	final static public String TASK_EXPORT = "export";
+	final static public String TASK_JSON_INFO = "json";
+	final static public String TASK_MCLOUD = "mcloud";
+
+	final static public String JSON_DIRECTORY = null;
+	final static public String TASK = null;
 
 	public static void main(String[] args) throws IOException {
 		if (args.length == 2) {
 
-			if (args[1].equals(MCLOUD)) {
+			// Configuration
+			String directoryJson = JSON_DIRECTORY == null ? args[0] : JSON_DIRECTORY;
+			String task = TASK == null ? args[1] : TASK;
 
-				List<File> files = Json.getJsonFilesInDirectory(args[0]);
+			// Run
+			if (task.equals(TASK_MCLOUD)) {
+				List<File> files = Json.getJsonFilesInDirectory(directoryJson);
 				for (File file : files) {
 					McloudDataset.add(new McloudDataset(file));
 				}
-				Statistics statistics = new Statistics(args[0]);
+				Statistics statistics = new Statistics(directoryJson);
 				statistics.calculate().writeHtmlFile();
 
-			} else if (args[1].equals(JSON_INFO)) {
+			} else if (task.equals(TASK_EXPORT)) {
+				List<File> files = Json.getJsonFilesInDirectory(directoryJson);
+				for (File file : files) {
+					McloudDataset.add(new McloudDataset(file));
+				}
+				Export export = new Export(directoryJson);
+				export.export();
 
-				List<File> files = Json.getJsonFilesInDirectory(args[0]);
+			} else if (task.equals(TASK_JSON_INFO)) {
+				List<File> files = Json.getJsonFilesInDirectory(directoryJson);
 				for (File file : files) {
 					JsonInfo.add(new JsonInfo(file));
 				}
 				JsonInfo.printInfo();
 
-			} else if (args[1].equals(CODE_GENERATION)) {
-
-				List<File> files = Json.getJsonFilesInDirectory(args[0]);
+			} else if (task.equals(TASK_CODE_GENERATION)) {
+				List<File> files = Json.getJsonFilesInDirectory(directoryJson);
 				for (File file : files) {
 					JsonInfo.add(new JsonInfo(file));
 				}
@@ -45,11 +59,13 @@ public abstract class Main {
 			}
 
 			else {
+				// Unknown task
 				printInfo();
 				System.exit(1);
 			}
 
 		} else {
+			// Incorrect number of arguments
 			printInfo();
 			System.exit(0);
 		}
@@ -58,8 +74,8 @@ public abstract class Main {
 	protected static void printInfo() {
 		System.out.println("Please specify two arguments:");
 		System.out.println("1) The directory with mCloud JSON files");
-		System.out.println("2) '" + MCLOUD + "' for mCloud statistics or");
-		System.out.println("   '" + JSON_INFO + "' for information about the used JSON format or");
-		System.out.println("   '" + CODE_GENERATION + "' for code generation");
+		System.out.println("2) '" + TASK_MCLOUD + "' for mCloud statistics or");
+		System.out.println("   '" + TASK_JSON_INFO + "' for information about the used JSON format or");
+		System.out.println("   '" + TASK_CODE_GENERATION + "' for code generation");
 	}
 }

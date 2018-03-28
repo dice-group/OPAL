@@ -22,11 +22,23 @@ public class Statistics {
 
 	public final static boolean WRITE_FILE = true;
 	final public static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+	final public static String CRAWLING_DATE = "2018-03-28";
 
 	protected SortedSet<McloudDataset> datasets;
 	protected String directory;
 	protected HtmlGenerator generator = new HtmlGenerator();
 
+	protected SortedMap<String, Integer> licenseNames = new TreeMap<String, Integer>();
+	protected SortedMap<String, Integer> licenseLocations = new TreeMap<String, Integer>();
+	protected Map<String, String> licenseNamesToLocations = new HashMap<String, String>();
+	protected int licenseNameGiven = 0;
+	protected int licenseNameNotGiven = 0;
+	protected int licenseLocationGiven = 0;
+	protected int licenseLocationNotGiven = 0;
+
+	/**
+	 * Directory containing mCloud JSON files
+	 */
 	public Statistics(String directory) {
 		this.directory = directory;
 		datasets = McloudDataset.getDatasets();
@@ -36,7 +48,7 @@ public class Statistics {
 		generator.generateHeader();
 
 		List<String> list = new LinkedList<String>();
-		list.add("Date of dataset crawling: 2018-01-29");
+		list.add("Date of dataset crawling: " + CRAWLING_DATE);
 		list.add("Date of statistics generation: " + HtmlGenerator.DATE);
 		list.add("Number of datasets: " + datasets.size());
 		list.add("Author: " + HtmlGenerator.AUTHOR);
@@ -44,6 +56,7 @@ public class Statistics {
 		generator.addList(list);
 
 		doDescriptions();
+		getLicenses();
 		doLicenses();
 		doJsonInfo();
 
@@ -74,7 +87,9 @@ public class Statistics {
 			if (!sources.isEmpty()) {
 				list.add("Sources: " + sources);
 			}
-			list.add("Retrieval: " + DATE_FORMAT.format(new Date(dataset.getRetrievalTimestamp())));
+			if (null != dataset.getRetrievalTimestamp()) {
+				list.add("Retrieval: " + DATE_FORMAT.format(new Date(dataset.getRetrievalTimestamp())));
+			}
 			list.add("File: " + dataset.getFile().getName() + " (" + dataset.getFile().length() + " bytes)");
 			generator.addList(list);
 		}
@@ -156,21 +171,36 @@ public class Statistics {
 	}
 
 	protected void doLicenses() {
-		SortedMap<String, Integer> names = new TreeMap<String, Integer>();
-		SortedMap<String, Integer> locations = new TreeMap<String, Integer>();
-		Map<String, String> namesToLocations = new HashMap<String, String>();
+		generator.addHeading("Licenses");
+		List<String> list = new LinkedList<String>();
+		list.add("License name given: " + licenseNameGiven);
+		list.add("License name not given: " + licenseNameNotGiven);
+		list.add("Number of license names: " + licenseNames.size());
+		list.add("License location given: " + licenseLocationGiven);
+		list.add("License location not given: " + licenseLocationNotGiven);
 
-		int licenseNameGiven = 0;
-		int licenseNameNotGiven = 0;
-		int licenseLocationGiven = 0;
-		int licenseLocationNotGiven = 0;
+		SortedMap<String, Integer> namesSortByUses = Utils.sortMapByValue(licenseNames);
+		for (Entry<String, Integer> entry : namesSortByUses.entrySet()) {
+			String name = entry.getKey();
+			if (licenseNamesToLocations.containsKey(name) && !licenseNamesToLocations.get(name).equals("null")) {
+				name = HtmlGenerator.getHtmlLink(licenseNamesToLocations.get(name), name);
+			}
+			int percent = (100 * entry.getValue() / datasets.size());
+			list.add(entry.getValue() + " uses (" + percent + "%) of " + name);
+		}
+
+		generator.addList(list);
+	}
+
+	protected void getLicenses() {
 
 		for (McloudDataset dataset : datasets) {
 			if (dataset.getLicenseLicensename() != null && !dataset.getLicenseLicensename().isEmpty()) {
-				if (names.containsKey(dataset.getLicenseLicensename())) {
-					names.put(dataset.getLicenseLicensename(), names.get(dataset.getLicenseLicensename()) + 1);
+				if (licenseNames.containsKey(dataset.getLicenseLicensename())) {
+					licenseNames.put(dataset.getLicenseLicensename(),
+							licenseNames.get(dataset.getLicenseLicensename()) + 1);
 				} else {
-					names.put(dataset.getLicenseLicensename(), 1);
+					licenseNames.put(dataset.getLicenseLicensename(), 1);
 				}
 				licenseNameGiven++;
 			} else {
@@ -178,11 +208,11 @@ public class Statistics {
 			}
 
 			if (dataset.getLicenseLicenselocation() != null && !dataset.getLicenseLicenselocation().isEmpty()) {
-				if (locations.containsKey(dataset.getLicenseLicenselocation())) {
-					locations.put(dataset.getLicenseLicenselocation(),
-							locations.get(dataset.getLicenseLicenselocation()) + 1);
+				if (licenseLocations.containsKey(dataset.getLicenseLicenselocation())) {
+					licenseLocations.put(dataset.getLicenseLicenselocation(),
+							licenseLocations.get(dataset.getLicenseLicenselocation()) + 1);
 				} else {
-					locations.put(dataset.getLicenseLicenselocation(), 1);
+					licenseLocations.put(dataset.getLicenseLicenselocation(), 1);
 				}
 				licenseLocationGiven++;
 			} else {
@@ -191,37 +221,16 @@ public class Statistics {
 
 			if (dataset.getLicenseLicensename() != null && !dataset.getLicenseLicensename().isEmpty()
 					&& dataset.getLicenseLicenselocation() != null && !dataset.getLicenseLicenselocation().isEmpty()) {
-				if (namesToLocations.containsKey(dataset.getLicenseLicensename())) {
+				if (licenseNamesToLocations.containsKey(dataset.getLicenseLicensename())) {
 					if (!dataset.getLicenseLicenselocation()
-							.equals(namesToLocations.get(dataset.getLicenseLicensename()))) {
+							.equals(licenseNamesToLocations.get(dataset.getLicenseLicensename()))) {
 						System.err.println("Warning: Different locations for " + dataset.getLicenseLicensename());
 					}
 				} else {
-					namesToLocations.put(dataset.getLicenseLicensename(), dataset.getLicenseLicenselocation());
+					licenseNamesToLocations.put(dataset.getLicenseLicensename(), dataset.getLicenseLicenselocation());
 				}
 			}
 		}
-
-		generator.addHeading("Licenses");
-		List<String> list = new LinkedList<String>();
-		list.add("License name given: " + licenseNameGiven);
-		list.add("License name not given: " + licenseNameNotGiven);
-		list.add("Number of license names: " + names.size());
-		list.add("License location given: " + licenseLocationGiven);
-		list.add("License location not given: " + licenseLocationNotGiven);
-
-		SortedMap<String, Integer> namesSortByUses = Utils.sortMapByValue(names);
-		for (Entry<String, Integer> entry : namesSortByUses.entrySet()) {
-			String name = entry.getKey();
-			if (namesToLocations.containsKey(name) && !namesToLocations.get(name).equals("null")) {
-				name = HtmlGenerator.getHtmlLink(namesToLocations.get(name), name);
-			}
-			int percent = (100 * entry.getValue() / datasets.size());
-			list.add(entry.getValue() + " uses (" + percent + "%) of " + name);
-		}
-
-		generator.addList(list);
-
 	}
 
 	public void writeHtmlFile() throws FileNotFoundException {

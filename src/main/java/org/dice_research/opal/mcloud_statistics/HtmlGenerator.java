@@ -102,6 +102,7 @@ public class HtmlGenerator {
 	}
 
 	protected File writeToFile(File directory) throws FileNotFoundException {
+		directory = new File(directory, "out");
 		directory.mkdirs();
 		File file = new File(directory, "mCloud-statistics-" + DATE + ".htm");
 		PrintWriter out = new PrintWriter(file);

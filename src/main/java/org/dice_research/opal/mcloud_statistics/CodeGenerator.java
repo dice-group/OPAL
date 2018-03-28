@@ -27,8 +27,9 @@ public abstract class CodeGenerator {
 			else if (classInfo.getKey().equals("java.lang.Long")) {
 				for (String key : classInfo.getValue()) {
 					sb.append("public Long get" + key.substring(0, 1).toUpperCase() + key.substring(1) + "() {");
+					sb.append("if(getJsonObject().has(\"" + key + "\")) {");
 					sb.append("return getJsonObject().getLong(\"" + key + "\");");
-					sb.append("}");
+					sb.append("} else { return null; }");
 					sb.append(System.lineSeparator());
 				}
 			}

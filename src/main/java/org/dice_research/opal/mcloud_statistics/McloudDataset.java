@@ -35,9 +35,19 @@ public class McloudDataset extends Json {
 		return file.getPath().toString();
 	}
 
+	/**
+	 * 	Note: Removed in mCloud between Jan and March 28th
+	 */
+	public Long getRetrievalTimestamp() {
+		if (getJsonObject().has("retrievalTimestamp")) {
+			return getJsonObject().getLong("retrievalTimestamp");
+		} else {
+			return null;
+		}
+	}
+
 	// Generated code
 	
-	public Long getRetrievalTimestamp() {return getJsonObject().getLong("retrievalTimestamp");}
 	public String getDescription() {return getJsonObject().getString("description");}
 	public String getTitle() {return getJsonObject().getString("title");}
 	public JSONArray getCategories() {return getJsonObject().getJSONArray("categories");}
