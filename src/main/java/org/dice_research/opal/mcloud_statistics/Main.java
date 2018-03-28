@@ -20,11 +20,20 @@ public abstract class Main {
 	final static public String TASK = null;
 
 	public static void main(String[] args) throws IOException {
-		if (args.length == 2) {
 
-			// Configuration
-			String directoryJson = JSON_DIRECTORY == null ? args[0] : JSON_DIRECTORY;
-			String task = TASK == null ? args[1] : TASK;
+		// Configuration
+		String directoryJson = null;
+		String task = null;
+		if (args.length == 2) {
+			directoryJson = args[0];
+			task = args[1];
+		}
+		if (JSON_DIRECTORY != null && TASK != null) {
+			directoryJson = JSON_DIRECTORY;
+			task = TASK;
+		}
+
+		if (directoryJson != null && task != null) {
 
 			// Run
 			if (task.equals(TASK_MCLOUD)) {

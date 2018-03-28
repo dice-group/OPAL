@@ -58,7 +58,12 @@ public class Export extends Statistics {
 	protected Map<Integer, Integer> getWordsInDescriptions() {
 		Map<Integer, Integer> lengthCounter = new HashMap<Integer, Integer>();
 		for (McloudDataset dataset : datasets) {
-			int words = dataset.getDescription().split(" ").length;
+			int words;
+			if (dataset.getDescription().trim().isEmpty()) {
+				words = 0;
+			} else {
+				words = dataset.getDescription().split(" ").length;
+			}
 			if (lengthCounter.containsKey(words)) {
 				lengthCounter.put(words, lengthCounter.get(words) + 1);
 			} else {
