@@ -46,5 +46,7 @@ g <- g+ ylab("Nutzung in Prozent")
 g <- g + geom_bar(stat="identity")
 #g <- g + geom_text(size=3, aes(label=paste(rel, "%", sep = "")), vjust=1.5, color='white')
 g <- g + geom_text(size=3, aes(label=paste(rel, "%", sep = "")), vjust=-.2)
-g + theme(axis.text.x = element_text(angle = 270, hjust = 0))
+g <- g + theme(axis.text.x = element_text(angle = -45, hjust = 0))
+g <- g + scale_y_continuous(label=function(x){return(paste(x, "%", sep = ""))}, expand = c(.07,0))
+g 
 

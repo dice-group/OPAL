@@ -6,6 +6,8 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class Export extends Statistics {
 
@@ -56,7 +58,7 @@ public class Export extends Statistics {
 	}
 
 	protected Map<Integer, Integer> getWordsInDescriptions() {
-		Map<Integer, Integer> lengthCounter = new HashMap<Integer, Integer>();
+		SortedMap<Integer, Integer> lengthCounter = new TreeMap<Integer, Integer>();
 		for (McloudDataset dataset : datasets) {
 			int words;
 			if (dataset.getDescription().trim().isEmpty()) {
