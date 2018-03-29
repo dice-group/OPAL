@@ -1,0 +1,109 @@
+---
+title: 'mCLOUD: Beschreibungstexte'
+author: "Adrian Wilke, Marleen Wagner"
+date: '2018-03-28'
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+
+```{r, echo=FALSE}
+library(ggplot2)
+library(ggrepel) # Image caption positions
+library(knitr) # Tabellen
+
+labelX <- "Wortanzahl in Beschreibungstexten"
+labelY <- "Anzahl Datensätze"
+
+descriptions <- read.csv("../data/2018-03-28/descriptions.csv")
+nonEmpty <- sum(descriptions[2:nrow(descriptions),"count"]) / sum(descriptions$count)
+atLeastThree <- sum(descriptions[4:nrow(descriptions),"count"]) / sum(descriptions$count)
+atLeastFive <- sum(descriptions[6:nrow(descriptions),"count"]) / sum(descriptions$count)
+atLeastTen <- sum(descriptions[11:nrow(descriptions),"count"]) / sum(descriptions$count)
+
+rangesDF <- read.csv("../data/2018-03-28/descriptions-ranges.csv")
+rangesDF$rangeStart <- rangesDF$range -9
+rangesDF$rangeStart[1] <- 0
+rangesDF$rel <- round(100*rangesDF$count / sum(rangesDF$count),2)
+```
+
+Auf der Plattform [mCLOUD](https://mcloud.de/) stellt das
+Bundesministerium für Verkehr und digitale Infrastruktur (BMVI) offene Daten aus dem Bereich Mobilität zur Verfügung.
+Die verfügbaren Datensätze werden von verschiedenen Anbietern bereitgestellt und sind damit zunächst voneinander unabhängig.
+Zur Suche relevanter Daten bietet mCloud die Möglichkeit zur Filterung nach Kategorien, Datenanbietern, Lizenzen und Datenformaten an.
+Eine Möglichkeit zur Verbesserung einer solchen Suchfunktion ist die Aufbereitung und Vernetzung der Metadaten.
+
+Das Projekt [Open Data Portal Germany (OPAL)](http://projekt-opal.de/) verfolgt das Ziel der Veredlung und Verknüpfung von Metadaten, um die Auffindbarkeit von Datensätzen zu verbessern.
+Dabei stehen öffentliche Datenquellen aus Deutschland im Mittelpunkt.
+Eine Besonderheit des Projekts ist die Fokussierung auf Metadaten.
+Zur Analyse werden nicht die eigentlichen Datensätze, sondern deren Beschreibungen verwendet.
+
+Eine Ansatz zur Gewinnung von Informationen aus Beschreibungen ist die Extraktion verlinkter, semantischer Daten aus unstrukturierten, natürlichsprachlichen Texten.
+Hierzu können bestehende Lösungen weiterentwickelt werden, z.B.
+[AGDISTIS](https://github.com/dice-group/AGDISTIS/wiki),
+[FOX](http://aksw.org/Projects/FOX.html) oder
+[REX](https://github.com/dice-group/REX/wiki).
+Hier kommt die Frage auf, welche Daten dazu genutzt werden können.
+
+Offene Daten, die auf mCLOUD bereitgestellt werden, sind überwiegend mit Beschreibungstexten versehen.
+Um eine erste Übersicht der verfügbaren Daten zu erhalten, haben wir einen pragmatisches Vorgehen gewählt.
+Es wurden 856 Beschreibungstexte heruntergeladen.
+Jeder Text wurde durch Leerzeichen getrennt, so dass sich eine Annäherung der Anzahl verwendeter Wörter ergibt.
+Eine Übersicht zeigt die folgende Grafik.
+
+```{r, echo=FALSE}
+plot <- qplot(data=descriptions, x=numberOfWords, y=count)
+plot <- plot + geom_point() 
+plot <- plot + geom_line(color="#999999")
+plot <- plot + labs(x = labelX, y = labelY)
+plot
+#ggsave("mcloud-beschreibungstexte-a.png", plot=plot, width=20, height=10, units="cm")
+```
+
+Am häufigsten werden Beschreibungstexte mit 10 Wörtern verwendet.
+Zur besseren Unterscheidung der Punkte wurden die Häufigkeiten aggregiert.
+Auf der folgenden Grafik sind die Häufigkeiten nach einer Zusammenfassung der Größe 10 dargestellt.
+Es stehen z.B. 183 Datensätze zur Verfügung, deren Wortanzahl zwischen 1 und 10 liegt.
+Zwischen 251 und 260 Wörtern wurde kein Datensatz gefunden.
+
+```{r, echo=FALSE}
+plotText <- paste(as.character((rangesDF$range)), ": ", as.character(rangesDF$count), sep="")
+plot2 <- qplot(data=rangesDF, x=rangesDF$range, y=rangesDF$count)
+plot2 <- plot2 + geom_point()
+plot2 <- plot2  + geom_line(color="#999999")
+plot2 <- plot2 + labs(x = labelX, y = labelY)
+plot2 <- plot2 + geom_text_repel(aes(label = plotText), size=3, box.padding = 0.4)
+plot2
+#ggsave("mcloud-beschreibungstexte-b.png", plot=plot2, width=20, height=10, units="cm")
+```
+
+Zusammenfassend stellt mCLOUD aus dieser quantitativen Sichtweise (ohne die Semantik der Daten zu betrachten) eine erste Grundlage zur Analyse unstrukturierter Daten zur Verfügung.
+Für rund 89 Prozent der Datensätze wird ein Beschreibungstext von mindestens 5 Wörtern bereitgestellt.
+Rund 6 Prozent der Datensätze sind nicht mit Beschreibungen versehen.
+In 9 Fällen besteht die Beschreibung aus einem Wort; häufig ist dies der Name einer Applikation.
+Die umfangreichste Beschreibung mit 289 Wörtern ist der Datensatz "Parkdaten Stadt Düsseldorf".
+
+Im Web finden Sie auch zukünftig [Neuigkeiten zu OPAL](http://projekt-opal.de/category/allgemein/).
+
+Auf Twitter informieren @[DiceResearch](https://twitter.com/DiceResearch) und @[akswgroup](https://twitter.com/akswgroup) über Neuigkeiten in den Bereichen Data Science und Semantic Web.
+
+Wenn Ihnen dieser Artikel gefallen hat, empfehlen Sie ihn auf [Twitter](https://twitter.com/intent/retweet?tweet_id=979326071022735360).
+
+```{r, echo=FALSE}
+kable(
+  data.frame(rangesDF$rangeStart, rangesDF$range, rangesDF$count, rangesDF$rel), 
+    col.names = c("Von Wortanzahl", "Bis Wortanzahl", "Anzahl Datensätze", "Prozent"),
+    caption = "Wortanzahl in Beschreibungstexten"
+ )
+```
+
+```{r, echo=FALSE}
+kable(
+  data.frame(descriptions$numberOfWords, descriptions$count), 
+    col.names = c("Wortanzahl", "Anzahl Datensätze"),
+    caption = "Wortanzahl in Beschreibungstexten"
+ )
+```
+
+Alle Angaben ohne Gewähr.

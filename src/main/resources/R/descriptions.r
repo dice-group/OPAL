@@ -29,6 +29,9 @@ colnames(descriptions) <- c("numberOfWords", "count")
 head(descriptions, 50)
 tail(descriptions)
 
+# Save
+write.csv(descriptions, paste("descriptions.csv"))
+
 
 
 #### Simple plot ####
@@ -42,6 +45,7 @@ plot <- plot + labs(x = labelX, y = labelY)
 #plot <- plot + geom_smooth(span=.1, method="loess", color="#666666")
 
 plot
+
 
 
 #### Summarized plot ####
@@ -66,15 +70,19 @@ head(ranges, 51)
 # ?by data, INDICES, FUN
 countByRanges <- by(descriptions$count, ranges, sum)
 countByRangesKeys <- as.numeric(names(countByRanges))
+head(countByRangesKeys)
 rangesDF <- as.data.frame(as.numeric(countByRanges))
 rangesDF$numberOfWords <- countByRangesKeys
 colnames(rangesDF) <- c("count", "range")
 head(rangesDF)
 tail(rangesDF)
-plotText <- paste(as.character((countByRangesKeys)), ": ", as.character(rangesDF$count), sep="")
 
+# Save
+write.csv(rangesDF, paste("descriptions-ranges.csv"))
+
+plotText <- paste(as.character((rangesDF$range)), ": ", as.character(rangesDF$count), sep="")
 labelX <- "Aggregierte Wortanzahl in Beschreibungstexten"
-plot2 <- qplot(data=rangesDF, x=rangesDF["range"], y=rangesDF["count"])
+plot2 <- qplot(data=rangesDF, x=rangesDF$range, y=rangesDF$count)
 #plot2 <- plot2 + geom_smooth(span=.6, method="loess", color="#666666")
 plot2 <- plot2 + geom_point()
 plot2 <- plot2  + geom_line(color="#999999")
