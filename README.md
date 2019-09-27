@@ -1,7 +1,4 @@
 # Open Data Portal Germany (OPAL)
 
-* [projekt-opal.de](http://projekt-opal.de/)
-
-## Sub-projects
-
-* [mCloud statistics](https://github.com/dice-group/OPAL/tree/mcloud-statistics)
+* Code: [https://github.com/projekt-opal](https://github.com/projekt-opal)
+* Project website: [http://projekt-opal.de/](http://projekt-opal.de/)
